@@ -15,8 +15,11 @@ function includes (str, query) {
   return text.indexOf(query.trim()) !== -1
 }
 
-function filterOptions (options, search, label, customLabel) {
-  return options.filter(option => includes(customLabel(option, label), search))
+function filterOptions (options, search, label, customLabel, customOptionInd) {
+  return options.filter((option, ind) => {
+    console.log('ind', ind, 'customInd', customOptionInd)
+    return includes(customLabel(option, label), search) || (ind === customOptionInd)
+  })
 }
 
 function stripGroups (options) {
@@ -38,7 +41,7 @@ function flattenOptions (values, label) {
     }, [])
 }
 
-function filterGroups (search, label, values, groupLabel, customLabel) {
+function filterGroups (search, label, values, groupLabel, customLabel, customOptionInd) {
   return (groups) =>
     groups.map(group => {
       /* istanbul ignore else */
@@ -46,7 +49,7 @@ function filterGroups (search, label, values, groupLabel, customLabel) {
         console.warn(`Options passed to vue-multiselect do not contain groups, despite the config.`)
         return []
       }
-      const groupOptions = filterOptions(group[values], search, label, customLabel)
+      const groupOptions = filterOptions(group[values], search, label, customLabel, customOptionInd)
 
       return groupOptions.length
         ? {
@@ -63,6 +66,7 @@ export default {
   data () {
     return {
       search: '',
+      customOptionInd: -1,
       isOpen: false,
       prefferedOpenDirection: 'below',
       optimizedHeight: this.maxHeight,
@@ -170,6 +174,14 @@ export default {
     allowEmpty: {
       type: Boolean,
       default: true
+    },
+    /**
+     * Allow to add custom values
+     * @default false
+     * @type {Function}
+     */
+    allowCustom: {
+      type: Function
     },
     /**
      * Reset this.internalValue, this.search after this.internalValue changes.
@@ -314,7 +326,7 @@ export default {
       if (this.internalSearch) {
         options = this.groupValues
           ? this.filterAndFlat(options, normalizedSearch, this.label)
-          : filterOptions(options, normalizedSearch, this.label, this.customLabel)
+          : filterOptions(options, normalizedSearch, this.label, this.customLabel, this.customOptionInd)
       } else {
         options = this.groupValues ? flattenOptions(this.groupValues, this.groupLabel)(options) : options
       }
@@ -397,8 +409,9 @@ export default {
      * @returns {Array} returns a filtered and flat options list
      */
     filterAndFlat (options, search, label) {
+      console.log('filterAndFlat', this.customOptionInd)
       return flow(
-        filterGroups(search, label, this.groupValues, this.groupLabel, this.customLabel),
+        filterGroups(search, label, this.groupValues, this.groupLabel, this.customLabel, this.customOptionInd),
         flattenOptions(this.groupValues, this.groupLabel)
       )(options)
     },
@@ -418,6 +431,18 @@ export default {
      * @param  {String}
      */
     updateSearch (query) {
+      if (this.allowCustom) {
+        if (this.customOptionInd !== -1) {
+          this.options.splice(this.customOptionInd, 1)
+        }
+
+        if (query) {
+          let customOption = this.allowCustom(query)
+          this.customOptionInd = this.options.length
+          this.options.push(customOption)
+        }
+      }
+
       this.search = query
     },
     /**

@@ -1,6 +1,7 @@
 import SingleSelectPrimitive from './SingleSelectPrimitive'
 import SingleSelectObject from './SingleSelectObject'
 import SingleSelectSearch from './SingleSelectSearch'
+import SingleSelectAddOptions from './SingleSelectAddOptions'
 import MultiSelect from './MultiSelect'
 import AjaxSearch from './AjaxSearch'
 import Tagging from './Tagging'
@@ -21,5 +22,6 @@ export {
   VuexActions,
   CustomConfig,
   Groups,
-  ActionDispatcher
+  ActionDispatcher,
+  SingleSelectAddOptions
 }
