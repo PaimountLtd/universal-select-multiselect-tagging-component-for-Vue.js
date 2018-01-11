@@ -42,7 +42,6 @@ export default {
 
     addCustom (search) {
       let [name, language] = search.split(' ')
-      console.log({ name, language })
       return { name, language }
     }
   }

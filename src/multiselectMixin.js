@@ -17,7 +17,6 @@ function includes (str, query) {
 
 function filterOptions (options, search, label, customLabel, customOptionInd) {
   return options.filter((option, ind) => {
-    console.log('ind', ind, 'customInd', customOptionInd)
     return includes(customLabel(option, label), search) || (ind === customOptionInd)
   })
 }
@@ -409,7 +408,6 @@ export default {
      * @returns {Array} returns a filtered and flat options list
      */
     filterAndFlat (options, search, label) {
-      console.log('filterAndFlat', this.customOptionInd)
       return flow(
         filterGroups(search, label, this.groupValues, this.groupLabel, this.customLabel, this.customOptionInd),
         flattenOptions(this.groupValues, this.groupLabel)
